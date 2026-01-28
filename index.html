@@ -111,6 +111,14 @@
     	font-size: 1rem;
     	font-weight: 400;
 	}
+
+	/* 新增色彩换算模块的主色调 */
+	.card-color { border-top-color: #FF2D55; } /* 使用系统红色/粉色区分 */
+	.color-input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+	.color-preview { height: 30px; border-radius: 6px; margin-top: 8px; border: 1px solid #eee; }
+	.y-result-box { background: rgba(255, 45, 85, 0.05); color: #FF2D55; padding: 15px; border-radius: 10px; margin-top: 10px; text-align: center; }
+	.diff-val { font-size: 1.8rem; font-weight: 800; }
+
     </style>
 </head>
 <body>
@@ -164,7 +172,7 @@
     </div>
 
     <div class="card card-forward">
-        <h2><i class="icon">🎨</i> 2. 视角 ➔ 像素</h2>
+        <h2><i class="icon">📐</i> 2. 视角 ➔ 像素</h2>
         <div class="content-area">
             <div class="group">
                 <label>目标元素视角 (FOV deg)</label>
@@ -202,6 +210,34 @@
             <div id="fovOut" class="val-large">0.00 <span class="unit">°</span></div>
         </div>
     </div>
+
+    <div class="card card-color">
+    	<h2><i class="icon">🎨</i> 色彩亮度核查 (YUV)</h2>
+    	<div class="content-area">
+        	<div class="color-input-group">
+            		<div class="group">
+                		<label>颜色 1 (HEX/RGB)</label>
+                		<input type="text" id="color1" placeholder="#FFFFFF" oninput="calculateColor()">
+                		<div id="preview1" class="color-preview"></div>
+            		</div>
+            		<div class="group">
+                		<label>颜色 2 (HEX/RGB)</label>
+                		<input type="text" id="color2" placeholder="#000000" oninput="calculateColor()">
+                		<div id="preview2" class="color-preview"></div>
+            		</div>
+        	</div>
+        	<div style="font-size: 0.75rem; color: var(--text-dim); line-height: 1.4;">
+            		<p>Y1: <span id="y1-val" style="color:var(--text-main); font-weight:bold;">-</span></p>
+            		<p>Y2: <span id="y2-val" style="color:var(--text-main); font-weight:bold;">-</span></p>
+        	</div>
+    	</div>
+    	<div class="y-result-box">
+        	<div style="font-size: 0.8rem; opacity: 0.8;">亮度差 (ΔY)</div>
+        	<div id="y-diff" class="diff-val">0.00</div>
+        	<div style="font-size: 0.7rem;">公式: Y = 0.299R + 0.587G + 0.114B</div>
+   	</div>
+     </div>
+
 </div>
 
 <script>
@@ -260,6 +296,58 @@
     // 初始化
     renderProjects();
     calculateAll();
+
+    // 解析颜色输入为 RGB 数组
+    function parseColor(input) {
+    	let r, g, b;
+    	input = input.trim();
+    
+    	// 处理 HEX
+    	if (input.startsWith('#')) {
+        	const hex = input.replace('#', '');
+        	r = parseInt(hex.substring(0, 2), 16);
+        	g = parseInt(hex.substring(2, 4), 16);
+        	b = parseInt(hex.substring(4, 6), 16);
+    	} 
+    	// 处理 RGB(a)
+    	else if (input.toLowerCase().startsWith('rgb')) {
+        	const match = input.match(/\d+/g);
+        	if (match) {
+            		[r, g, b] = match.map(Number);
+        	}
+    	}
+    
+    	if (isNaN(r) || isNaN(g) || isNaN(b)) return null;
+    		return { r, g, b };
+     }
+
+     function calculateColor() {
+    	const c1Input = document.getElementById('color1').value;
+    	const c2Input = document.getElementById('color2').value;
+    
+    	const c1 = parseColor(c1Input);
+    	const c2 = parseColor(c2Input);
+    
+    	let y1 = 0, y2 = 0;
+
+    	if (c1) {
+        	y1 = 0.299 * c1.r + 0.587 * c1.g + 0.114 * c1.b;
+        	document.getElementById('y1-val').innerText = y1.toFixed(2);
+        	document.getElementById('preview1').style.backgroundColor = `rgb(${c1.r},${c1.g},${c1.b})`;
+    	}
+    
+    	if (c2) {
+        	y2 = 0.299 * c2.r + 0.587 * c2.g + 0.114 * c2.b;
+        	document.getElementById('y2-val').innerText = y2.toFixed(2);
+        	document.getElementById('preview2').style.backgroundColor = `rgb(${c2.r},${c2.g},${c2.b})`;
+    	}
+    
+    	if (c1 && c2) {
+        	const diff = Math.abs(y1 - y2);
+        	document.getElementById('y-diff').innerText = diff.toFixed(2);
+    	}
+     }
+
 </script>
 
 </body>
