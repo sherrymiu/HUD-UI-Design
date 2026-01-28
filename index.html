@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HUD UI Tool</title>
+    <title>HUD UI 设计专家工具</title>
     <style>
         :root {
             --bg-color: #f5f7fa;
@@ -13,6 +13,7 @@
             --blue: #007AFF;
             --purple: #5856D6;
             --green: #34C759;
+            --orange: #FF9500;
             --border-radius: 16px;
         }
 
@@ -25,15 +26,15 @@
         }
 
         .container { 
-            width: 100%; max-width: 1200px; 
+            width: 100%; max-width: 1400px; 
             display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 20px; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 15px; 
             align-items: stretch;
         }
 
         .card { 
-            background: var(--card-bg); padding: 24px; 
+            background: var(--card-bg); padding: 20px; 
             border-radius: var(--border-radius); 
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
             display: flex; 
@@ -41,68 +42,110 @@
             border-top: 6px solid #ccc;
         }
 
+        .card-project { border-top-color: var(--orange); }
         .card-hw { border-top-color: var(--blue); }
         .card-forward { border-top-color: var(--purple); }
         .card-backward { border-top-color: var(--green); }
 
-        h2 { margin: 0 0 20px 0; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; }
+        h2 { margin: 0 0 15px 0; font-size: 1rem; font-weight: 600; display: flex; align-items: center; }
         .icon { margin-right: 8px; font-style: normal; }
 
-        .content-area {
-            flex-grow: 1; 
-            display: flex;
-            flex-direction: column;
-        }
+        .content-area { flex-grow: 1; display: flex; flex-direction: column; }
 
-        .group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 6px; font-weight: 500; }
+        .group { margin-bottom: 12px; }
+        label { display: block; font-size: 0.75rem; color: var(--text-dim); margin-bottom: 5px; font-weight: 500; }
         
         input { 
-            width: 100%; padding: 12px; 
+            width: 100%; padding: 10px; 
             background: #f5f5f7; border: 1px solid transparent; 
-            border-radius: 10px; color: var(--text-main); font-size: 1rem; 
+            border-radius: 8px; color: var(--text-main); font-size: 0.95rem; 
             box-sizing: border-box; transition: 0.2s;
         }
         input:focus { background: #fff; border-color: #ddd; outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
 
         .result-panel { 
-            margin-top: 20px; 
-            padding: 20px; 
-            border-radius: 12px; 
-            text-align: center;
-            min-height: 100px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            margin-top: 15px; padding: 15px; border-radius: 10px; text-align: center;
+            min-height: 80px; display: flex; flex-direction: column; justify-content: center;
         }
         .blue-bg { background: rgba(0, 122, 255, 0.05); color: var(--blue); }
         .purple-bg { background: rgba(88, 86, 214, 0.05); color: var(--purple); }
         .green-bg { background: rgba(52, 199, 89, 0.05); color: var(--green); }
 
-        .val-large { font-size: 2.2rem; font-weight: 700; margin: 2px 0; font-variant-numeric: tabular-nums; }
-        .unit { font-size: 0.9rem; font-weight: 400; opacity: 0.8; }
+        .val-large { font-size: 1.8rem; font-weight: 700; margin: 2px 0; font-variant-numeric: tabular-nums; }
+        .unit { font-size: 0.8rem; font-weight: 400; opacity: 0.8; }
 
-        .std-list { margin-top: 15px; font-size: 0.8rem; border-top: 1px solid #f0f0f2; padding-top: 15px; }
-        .std-item { display: flex; justify-content: space-between; margin-bottom: 8px; cursor: pointer; padding: 4px; border-radius: 4px; }
-        .std-item:hover { background: #f5f5f7; }
-        .std-item b { color: var(--text-main); }
+        .std-list { margin-top: 10px; font-size: 0.75rem; border-top: 1px solid #f0f0f2; padding-top: 10px; }
+        .std-item { display: flex; justify-content: space-between; margin-bottom: 6px; cursor: pointer; padding: 6px; border-radius: 6px; border: 1px solid transparent; transition: 0.2s; }
+        .std-item:hover { background: #f5f5f7; border-color: #eee; }
         
-        /* 针对模块1预设值的颜色强调 */
-        .std-item .hw-val { color: var(--blue); font-weight: 600; }
-        /* 针对模块2预设值的颜色强调 */
-        .std-item .fov-val { color: var(--purple); font-weight: 600; }
+        /* 表格样式优化 */
+        .project-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; cursor: pointer; }
+        .project-table tr:hover { background: #f0f7ff; }
+        .project-table td, .project-table th { padding: 8px; border-bottom: 1px solid #f0f0f2; text-align: left; }
+        .project-table th { color: var(--text-dim); font-weight: 500; }
 
-        @media (max-width: 900px) { 
-            .container { grid-template-columns: 1fr; } 
-            .result-panel { min-height: auto; }
-        }
+        @media (max-width: 1200px) { .container { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .container { grid-template-columns: 1fr; } }
+
+	.app-header {
+    	grid-column: 1 / -1; /* 让标题横跨所有列 */
+    	padding: 20px 10px 40px 10px;
+   	text-align: left;
+	}
+
+	.app-header h1 {
+    	margin: 0;
+    	font-size: 2.5rem;
+    	font-weight: 800;
+   	letter-spacing: -1px;
+    	background: linear-gradient(135deg, var(--text-main) 0%, var(--blue) 100%);
+    	-webkit-background-clip: text;
+    	-webkit-text-fill-color: transparent;
+    	display: flex;
+    	align-items: center;
+	}
+
+	.app-header p {
+    	margin: 10px 0 0 0;
+    	color: var(--text-dim);
+    	font-size: 1rem;
+    	font-weight: 400;
+	}
     </style>
 </head>
 <body>
 
 <div class="container">
+	<header class="app-header">
+        <h1>HUD UI 计算器 👻</h1>
+        <p>基于硬件 PPD 的视场角(FOV)与像素(Pixel)精准换算工具</p>
+    	</header>
+    <div class="card card-project">
+        <h2><i class="icon">📁</i> HUD 硬件规格</h2>
+        <div class="content-area">
+            <table class="project-table">
+                <thead>
+                    <tr><th>车型</th><th>H-FOV</th><th>横向分辨率</th></tr>
+                </thead>
+                <tbody id="projectList">
+                    	<tr onclick="applyHw(12, 1920)"><td>F2 ARHUD</td><td>12°</td><td>1920</td></tr>
+			<tr onclick="applyHw(10.7, 1800)"><td>F3 ARHUD</td><td>10.7°</td><td>1800</td></tr>
+			<tr onclick="applyHw(10.7, 1800)"><td>F1L ARHUD</td><td>10.7°</td><td>1800</td></tr>
+			<tr onclick="applyHw(10.7, 1800)"><td>EHU ARHUD</td><td>10.7°</td><td>1800</td></tr>
+			<tr onclick="applyHw(12.4, 1920)"><td>X6S ARHUD</td><td>12.4°</td><td>1920</td></tr>
+			<tr onclick="applyHw(9, 1074)"><td>X1L WHUD</td><td>9°</td><td>1074</td></tr>
+			<tr onclick="applyHw(9, 730)"><td>EHV WHUD</td><td>9°</td><td>730</td></tr>
+                    	<tr onclick="applyHw(9, 747)"><td>X4M WHUD</td><td>9°</td><td>747</td></tr>
+                    	<tr onclick="applyHw(9, 1482)"><td>X6M WHUD</td><td>9°</td><td>1482</td></tr>
+                    	<tr onclick="applyHw(9, 1245)"><td>SHB WHUD</td><td>9°</td><td>1245</td></tr>
+                </tbody>
+            </table>
+            <p style="font-size: 0.7rem; color: var(--text-dim); margin-top: 10px;">* 点击车型行可快速切换配置</p>
+        </div>
+    </div>
+
     <div class="card card-hw">
-        <h2><i class="icon">⚙️</i> 1. HUD 硬件配置</h2>
+        <h2><i class="icon">⚙️</i> 1. 当前参数</h2>
         <div class="content-area">
             <div class="group">
                 <label>硬件 FOV (水平 deg)</label>
@@ -112,38 +155,29 @@
                 <label>硬件 UI 分辨率 (水平 px)</label>
                 <input type="number" id="hwRes" value="1074" oninput="calculateAll()">
             </div>
-            <div class="std-list">
-                <div style="color: var(--text-dim); margin-bottom: 8px;">常用硬件值 (点击填入):</div>
-                <div class="std-item" onclick="applyHw(12, 1920)">ARHUD <span class="hw-val">12° / 1920px</span></div>
-                <div class="std-item" onclick="applyHw(9, 1074)">WHUD <span class="hw-val">9° / 1074px</span></div>
-            </div>
         </div>
         <div class="result-panel blue-bg">
             <div style="font-size: 0.8rem; opacity: 0.8;">像素密度 PPD</div>
-            <div id="ppdOut" class="val-large">115.20</div>
+            <div id="ppdOut" class="val-large">119.33</div>
             <div style="font-size: 0.7rem;">Pixels Per Degree</div>
         </div>
     </div>
 
     <div class="card card-forward">
-        <h2><i class="icon">🎨</i> 2. 元素视角 ➔ 像素</h2>
+        <h2><i class="icon">🎨</i> 2. 视角 ➔ 像素</h2>
         <div class="content-area">
             <div class="group">
                 <label>目标元素视角 (FOV deg)</label>
                 <input type="number" id="targetFov" placeholder="例如: 0.8" step="0.01" oninput="calculateAll()">
             </div>
             <div class="std-list">
-                <div style="color: var(--text-dim); margin-bottom: 8px;">常用标准 (点击填入):</div>
-                <div class="std-item" onclick="applyFov(0.8)">关键信息（车速） <b class="fov-val">min: 0.8°</b></div>
-                <div class="std-item" onclick="applyFov(0.5)">主要文字 （导航信息）<b class="fov-val">min: 0.5°</b></div>
-                <div class="std-item" onclick="applyFov(0.2)">次要文字 （路名、辅助文字）<b class="fov-val">min: 0.2°</b></div>
-                <div class="std-item" onclick="applyFov(0.3)">图形/图标 <b class="fov-val">min: 0.3°</b></div>
+                <div class="std-item" onclick="applyFov(0.8)">关键信息 <b>min: 0.8°</b></div>
+                <div class="std-item" onclick="applyFov(0.5)">主要文字 <b>min: 0.5°</b></div>
+		<div class="std-item" onclick="applyFov(0.2)">次要文字 <b>min: 0.2°</b></div>	
+                <div class="std-item" onclick="applyFov(0.3)">图形图标 <b>min: 0.3°</b></div>
             </div>
-        </div>
-        <div style="margin-top: 15px; padding: 10px; background: #fff7e6; border-radius: 8px; border: 1px solid #ffd591;">
-            <div style="color: #d46b08; font-size: 0.75rem; font-weight: bold; margin-bottom: 4px;">⚠️ 设计提示</div>
-            <div style="color: #8c8c8c; font-size: 0.7rem; line-height: 1.4;">
-                上述 FOV 为行业<b>最小可读性底线</b>。实际设计时，请结合 PGU 像质、强光环境及挡风玻璃畸变情况，建议在此基础上增加 10%~20% 的余量。
+            <div style="margin-top: 10px; padding: 8px; background: #fff7e6; border-radius: 6px; border: 1px solid #ffd591; font-size: 0.65rem; color: #8c8c8c;">
+                提示：实际建议在此基础上增加 10%~20% 余量。点击可直接输入最小值。
             </div>
         </div>
         <div class="result-panel purple-bg">
@@ -153,15 +187,14 @@
     </div>
 
     <div class="card card-backward">
-        <h2><i class="icon">🔍</i> 3. 像素 ➔ 元素视角</h2>
+        <h2><i class="icon">🔍</i> 3. 像素 ➔ 视角</h2>
         <div class="content-area">
             <div class="group">
                 <label>现有 UI 尺寸 (px)</label>
                 <input type="number" id="inputPx" placeholder="例如: 60" oninput="calculateAll()">
             </div>
-            <div style="margin-top: 15px; font-size: 0.75rem; color: var(--text-dim); line-height: 1.4;">
-                <b>提示：</b><br>
-                将此结果与模块 2 中的标准对比，判断现有设计是否符合可读性要求。
+            <div style="margin-top: 10px; font-size: 0.7rem; color: var(--text-dim); line-height: 1.4;">
+                将此结果与模块 2 的标准对比，核查设计稿是否合规。
             </div>
         </div>
         <div class="result-panel green-bg">
@@ -172,6 +205,31 @@
 </div>
 
 <script>
+    // 基于你上传的 Excel 数据填充表格 (你可以根据实际情况微调这些值)
+    const projects = [
+        { name: "F2 ARHUD", fov: 12, res: 1920 },
+	{ name: "F3 ARHUD", fov: 10.7, res: 1800 },
+	{ name: "F1L ARHUD", fov: 10.7, res: 1800 },
+	{ name: "EHU ARHUD", fov: 10.7, res: 1800 },	
+	{ name: "X6S ARHUD", fov: 12.4, res: 1920 },
+        { name: "X1L WHUD", fov: 9, res: 1074 },
+        { name: "EHV WHUD", fov: 9, res: 730 },
+	{ name: "X4M WHUD", fov: 9, res: 747 },
+	{ name: "X6M WHUD", fov: 9, res: 1482 },
+	{ name: "SHB WHUD", fov: 9, res: 1245 },
+    ];
+
+    function renderProjects() {
+        const html = projects.map(p => `
+            <tr onclick="applyHw(${p.fov}, ${p.res})">
+                <td>${p.name}</td>
+                <td>${p.fov}°</td>
+                <td>${p.res}</td>
+            </tr>
+        `).join('');
+        document.getElementById('projectList').innerHTML = html;
+    }
+
     function calculateAll() {
         const hwFov = parseFloat(document.getElementById('hwFov').value) || 0;
         const hwRes = parseFloat(document.getElementById('hwRes').value) || 0;
@@ -181,30 +239,26 @@
         if (hwFov > 0 && hwRes > 0) {
             const ppd = hwRes / hwFov;
             document.getElementById('ppdOut').innerText = ppd.toFixed(2);
-
-            // 正向
             const pxRes = Math.round(targetFov * ppd);
             document.getElementById('pxOut').innerHTML = pxRes + ' <span class="unit">px</span>';
-
-            // 逆向
             const fovRes = inputPx / ppd;
             document.getElementById('fovOut').innerHTML = fovRes.toFixed(2) + ' <span class="unit">°</span>';
         }
     }
 
-    // 模块 1 的填入函数
     function applyHw(fov, res) {
         document.getElementById('hwFov').value = fov;
         document.getElementById('hwRes').value = res;
         calculateAll();
     }
 
-    // 模块 2 的填入函数
     function applyFov(val) {
         document.getElementById('targetFov').value = val;
         calculateAll();
     }
 
+    // 初始化
+    renderProjects();
     calculateAll();
 </script>
 
