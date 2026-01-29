@@ -119,15 +119,31 @@
 	.y-result-box { background: rgba(255, 45, 85, 0.05); color: #FF2D55; padding: 15px; border-radius: 10px; margin-top: 10px; text-align: center; }
 	.diff-val { font-size: 1.8rem; font-weight: 800; }
 
+	@keyframes ghost-float {
+	    0% {
+	        transform: translate(-50%, -50%) scale(0.3);
+	        opacity: 0;
+	    }
+	    20% {
+	        opacity: 1;
+	        transform: translate(-50%, -50%) scale(1.2);
+	    }
+	    100% {
+	        /* 使用我们定义的随机变量 --x 和 --y */
+	        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.5);
+	        opacity: 0;
+	    }
+	}
+		
     </style>
 </head>
 <body>
 
 <div class="container">
 	<header class="app-header">
-        <h1>HUD UI 计算器 👻</h1>
-        <p>基于硬件 PPD 的视场角(FOV)与像素(Pixel)精准换算工具</p>
-    	</header>
+    	<h1>HUD UI 工具箱 <span id="ghost-trigger" style="cursor: pointer; user-select: none;">👻</span></h1>
+    	<p>视场角 FOV 与像素 换算助手</p>
+	</header>
     <div class="card card-project">
         <h2><i class="icon">📁</i> HUD 硬件规格</h2>
         <div class="content-area">
@@ -347,6 +363,37 @@
         	document.getElementById('y-diff').innerText = diff.toFixed(2);
     	}
      }
+	document.getElementById('ghost-trigger').addEventListener('click', function(e) {
+    // 获取 🎯 图标在屏幕上的位置
+    const rect = this.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const count = 6; // 每次喷射的数量
+    
+    for (let i = 0; i < count; i++) {
+        const ghost = document.createElement('div');
+        ghost.className = 'ghost-emoji';
+        ghost.innerText = '👻';
+        
+        // 设置初始位置为图标中心
+        ghost.style.left = centerX + 'px';
+        ghost.style.top = centerY + 'px';
+        
+        // 随机左右偏移和向上的高度
+        const randomX = (Math.random() - 0.5) * 150 + 'px';
+        const randomY = - (100 + Math.random() * 100) + 'px'; // 向上飘 100-200px
+        
+        ghost.style.setProperty('--x', randomX);
+        ghost.style.setProperty('--y', randomY);
+        
+        document.body.appendChild(ghost);
+        
+        setTimeout(() => {
+            ghost.remove();
+        }, 1500);
+	}
+});
 
 </script>
 
