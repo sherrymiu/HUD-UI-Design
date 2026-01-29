@@ -119,18 +119,31 @@
 	.y-result-box { background: rgba(255, 45, 85, 0.05); color: #FF2D55; padding: 15px; border-radius: 10px; margin-top: 10px; text-align: center; }
 	.diff-val { font-size: 1.8rem; font-weight: 800; }
 
-	@keyframes ghost-float {
+	.ghost-emoji {
+    position: fixed;
+    pointer-events: none;
+    font-size: 28px;
+    z-index: 9999;
+    user-select: none;
+    /* 初始状态：居中且缩小 */
+    transform: translate(-50%, -50%) scale(0);
+	}
+
+	@keyframes ghost-insta-up {
 	    0% {
-	        transform: translate(-50%, -50%) scale(0.3);
+	        transform: translate(-50%, -50%) scale(0);
 	        opacity: 0;
 	    }
-	    20% {
+	    15% {
+	        transform: translate(-50%, -80%) scale(1.4); /* 快速弹出并放大 */
 	        opacity: 1;
-	        transform: translate(-50%, -50%) scale(1.2);
+	    }
+	    30% {
+	        transform: translate(-50%, -100%) scale(1); /* 回缩到正常大小 */
 	    }
 	    100% {
-	        /* 使用我们定义的随机变量 --x 和 --y */
-	        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.5);
+	        /* var(--x-out) 是随机左右偏移, var(--y-out) 是向上飘的高度 */
+	        transform: translate(calc(-50% + var(--x-out)), var(--y-out)) scale(1.2);
 	        opacity: 0;
 	    }
 	}
@@ -363,36 +376,37 @@
         	document.getElementById('y-diff').innerText = diff.toFixed(2);
     	}
      }
-	document.getElementById('ghost-trigger').addEventListener('click', function(e) {
-    // 获取 🎯 图标在屏幕上的位置
-    const rect = this.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
+	document.addEventListener('click', function(e) {
+    // 如果你只想在点击标题 🎯 时触发，可以加这个判断：
+    if (e.target.id !== 'ghost-trigger') return;
 
-    const count = 6; // 每次喷射的数量
+    const count = 3; // 每次点击飞出 3 个，更有层次感
     
     for (let i = 0; i < count; i++) {
         const ghost = document.createElement('div');
         ghost.className = 'ghost-emoji';
         ghost.innerText = '👻';
         
-        // 设置初始位置为图标中心
-        ghost.style.left = centerX + 'px';
-        ghost.style.top = centerY + 'px';
+        // 1. 设置点击的具体坐标
+        ghost.style.left = e.clientX + 'px';
+        ghost.style.top = e.clientY + 'px';
         
-        // 随机左右偏移和向上的高度
-        const randomX = (Math.random() - 0.5) * 150 + 'px';
-        const randomY = - (100 + Math.random() * 100) + 'px'; // 向上飘 100-200px
+        // 2. 随机化路径参数
+        const randomX = (Math.random() - 0.5) * 100 + 'px'; // 左右偏移 -50px 到 50px
+        const randomY = (e.clientY - 150 - Math.random() * 100) + 'px'; // 向上飘 150-250px
+        const randomDelay = Math.random() * 0.1 + 's';
         
-        ghost.style.setProperty('--x', randomX);
-        ghost.style.setProperty('--y', randomY);
+        ghost.style.setProperty('--x-out', randomX);
+        ghost.style.setProperty('--y-out', randomY);
+        
+        // 3. 应用动画
+        ghost.style.animation = `ghost-insta-up 0.8s ease-out ${randomDelay} forwards`;
         
         document.body.appendChild(ghost);
         
-        setTimeout(() => {
-            ghost.remove();
-        }, 1500);
-	}
+        // 4. 清理元素
+        setTimeout(() => ghost.remove(), 1000);
+    }
 });
 
 </script>
