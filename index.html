@@ -3,412 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HUD UI Toolbox</title>
+    <title>HUD UI 工具箱</title>
     <style>
         :root {
-            --bg-color: #f5f7fa;
+            --bg-color: #f5f5f7;
             --card-bg: #ffffff;
             --text-main: #1d1d1f;
             --text-dim: #86868b;
-            --blue: #007AFF;
+            --blue: #0071e3;
             --purple: #5856D6;
             --green: #34C759;
             --orange: #FF9500;
-            --border-radius: 16px;
+            --red: #FF2D55;
+            --border-radius: 20px;
         }
 
         body { 
-            font-family: -apple-system, "SF Pro Text", sans-serif; 
+            font-family: -apple-system, "SF Pro Text", "SF Pro Display", sans-serif; 
             background: var(--bg-color); color: var(--text-main);
-            margin: 0; padding: 20px;
+            margin: 0; padding: 40px 20px;
             display: flex; justify-content: center;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
         .container { 
-            width: 100%; max-width: 1400px; 
+            width: 100%; max-width: 1300px; 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
-            gap: 15px; 
-            align-items: stretch;
+            gap: 20px; 
         }
 
+        .full-row {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: stretch;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* 基础卡片样式 */
         .card { 
-            background: var(--card-bg); padding: 20px; 
+            background: var(--card-bg); padding: 25px; 
             border-radius: var(--border-radius); 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
             display: flex; 
             flex-direction: column;
-            border-top: 6px solid #ccc;
+            position: relative;
+            transition: box-shadow 0.3s ease;
+        }
+        .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+
+        /* 顶部卡片：纯白 Apple 风格 */
+        .convert-card { flex: 1; border-top: 1px solid rgba(0,0,0,0.05); }
+
+        /* 下方卡片：彩色装饰条 & 高度对齐 */
+        .card-bottom { 
+            min-height: 380px; /* 统一底部卡片高度 */
+            justify-content: flex-start;
+        }
+        .card-project { border-top: 6px solid var(--orange); }
+        .card-hw { border-top: 6px solid var(--blue); }
+        .card-forward { border-top: 6px solid var(--purple); }
+        .card-color { border-top: 6px solid var(--red); }
+
+        .app-header { grid-column: 1 / -1; padding: 0 10px 30px 10px; }
+        .app-header h1 { margin: 0; font-size: 2.2rem; font-weight: 700; display: flex; align-items: center; }
+
+        /* 👻 交互样式 */
+        #ghost-emoji { cursor: pointer; display: inline-block; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); margin-left: 12px; }
+        .floating-ghost { position: fixed; pointer-events: none; z-index: 9999; font-size: 2rem; animation: ghostUp 1.8s ease-out forwards; }
+        @keyframes ghostUp {
+            0% { transform: translate(0, 0) scale(0.5) rotate(0deg); opacity: 1; }
+            100% { transform: translate(var(--x-random), -200px) scale(1.5) rotate(var(--r-random)); opacity: 0; }
         }
 
-        .card-project { border-top-color: var(--orange); }
-        .card-hw { border-top-color: var(--blue); }
-        .card-forward { border-top-color: var(--purple); }
-        .card-backward { border-top-color: var(--green); }
-
-        h2 { margin: 0 0 15px 0; font-size: 1rem; font-weight: 600; display: flex; align-items: center; }
-        .icon { margin-right: 8px; font-style: normal; }
-
-        .content-area { flex-grow: 1; display: flex; flex-direction: column; }
-
-        .group { margin-bottom: 12px; }
-        label { display: block; font-size: 0.75rem; color: var(--text-dim); margin-bottom: 5px; font-weight: 500; }
+        h2 { margin: 0 0 15px 0; font-size: 1.1rem; font-weight: 600; }
+        label { display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 8px; font-weight: 500; }
         
-        input { 
-            width: 100%; padding: 10px; 
-            background: #f5f5f7; border: 1px solid transparent; 
-            border-radius: 8px; color: var(--text-main); font-size: 0.95rem; 
-            box-sizing: border-box; transition: 0.2s;
-        }
-        input:focus { background: #fff; border-color: #ddd; outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+        select { width: 100%; padding: 12px; background: #f5f5f7; border: 1px solid transparent; border-radius: 12px; font-size: 0.95rem; cursor: pointer; }
 
-        .result-panel { 
-            margin-top: 15px; padding: 15px; border-radius: 10px; text-align: center;
+        /* 顶部显性输入面板 */
+        .display-panel {
+            background: #f5f5f7; padding: 20px; border-radius: 16px; text-align: center;
+            display: flex; flex-direction: column; justify-content: center; min-height: 110px;
+            border: 2px solid transparent; transition: all 0.2s ease;
+        }
+        .display-panel:focus-within { background: #fff; border-color: var(--blue); box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1); }
+        .panel-input { background: transparent; border: none; width: 100%; text-align: center; font-size: 2.8rem; font-weight: 700; outline: none; }
+
+        /* 底部卡片输出区域背板 */
+        .result-panel-styled {
+            margin-top: auto; /* 关键：推到底部对齐 */
+            padding: 15px; border-radius: 12px; text-align: center;
             min-height: 80px; display: flex; flex-direction: column; justify-content: center;
         }
-        .blue-bg { background: rgba(0, 122, 255, 0.05); color: var(--blue); }
-        .purple-bg { background: rgba(88, 86, 214, 0.05); color: var(--purple); }
-        .green-bg { background: rgba(52, 199, 89, 0.05); color: var(--green); }
-
-        .val-large { font-size: 1.8rem; font-weight: 700; margin: 2px 0; font-variant-numeric: tabular-nums; }
-        .unit { font-size: 0.8rem; font-weight: 400; opacity: 0.8; }
-
-        .std-list { margin-top: 10px; font-size: 0.75rem; border-top: 1px solid #f0f0f2; padding-top: 10px; }
-        .std-item { display: flex; justify-content: space-between; margin-bottom: 6px; cursor: pointer; padding: 6px; border-radius: 6px; border: 1px solid transparent; transition: 0.2s; }
-        .std-item:hover { background: #f5f5f7; border-color: #eee; }
+        .blue-bg { background: rgba(0, 113, 227, 0.06); color: var(--blue); }
+        .purple-bg { background: rgba(88, 86, 214, 0.06); color: var(--purple); }
+        .red-bg { background: rgba(255, 45, 85, 0.06); color: var(--red); }
         
-        /* 表格样式优化 */
-        .project-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; cursor: pointer; }
-        .project-table tr:hover { background: #f0f7ff; }
-        .project-table td, .project-table th { padding: 8px; border-bottom: 1px solid #f0f0f2; text-align: left; }
-        .project-table th { color: var(--text-dim); font-weight: 500; }
+        .val-styled { font-size: 1.8rem; font-weight: 700; margin: 2px 0; }
+        .unit-small { font-size: 0.8rem; opacity: 0.8; font-weight: 400; }
 
-        @media (max-width: 1200px) { .container { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { .container { grid-template-columns: 1fr; } }
+        .arrow-separator { display: flex; align-items: center; justify-content: center; color: #d2d2d7; }
 
-	.app-header {
-    	grid-column: 1 / -1; /* 让标题横跨所有列 */
-    	padding: 20px 10px 40px 10px;
-   	text-align: left;
-	}
+        /* 硬件规格库列表优化 */
+        .project-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .project-table tr { cursor: pointer; border-bottom: 1px solid #f5f5f7; }
+        .project-table td { padding: 10px 5px; }
+        .table-container { overflow-y: auto; max-height: 320px; } /* 露出更多行数 */
 
-	.app-header h1 {
-    	margin: 0;
-    	font-size: 2.5rem;
-    	font-weight: 800;
-   	letter-spacing: -1px;
-    	background: linear-gradient(135deg, var(--text-main) 0%, var(--blue) 100%);
-    	-webkit-background-clip: text;
-    	-webkit-text-fill-color: transparent;
-    	display: flex;
-    	align-items: center;
-	}
+        .small-input { width: 100%; border: none; background: #f5f5f7; padding: 10px; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; }
 
-	.app-header p {
-    	margin: 10px 0 0 0;
-    	color: var(--text-dim);
-    	font-size: 1rem;
-    	font-weight: 400;
-	}
-
-	/* 新增色彩换算模块的主色调 */
-	.card-color { border-top-color: #FF2D55; } /* 使用系统红色/粉色区分 */
-	.color-input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-	.color-preview { height: 30px; border-radius: 6px; margin-top: 8px; border: 1px solid #eee; }
-	.y-result-box { background: rgba(255, 45, 85, 0.05); color: #FF2D55; padding: 15px; border-radius: 10px; margin-top: 10px; text-align: center; }
-	.diff-val { font-size: 1.8rem; font-weight: 800; }
-
-	.ghost-emoji {
-    position: fixed;
-    pointer-events: none;
-    font-size: 28px;
-    z-index: 9999;
-    user-select: none;
-    /* 初始状态：居中且缩小 */
-    transform: translate(-50%, -50%) scale(0);
-	}
-
-	@keyframes ghost-insta-up {
-	    0% {
-	        transform: translate(-50%, -50%) scale(0);
-	        opacity: 0;
-	    }
-	    15% {
-	        transform: translate(-50%, -80%) scale(1.4); /* 快速弹出并放大 */
-	        opacity: 1;
-	    }
-	    30% {
-	        transform: translate(-50%, -100%) scale(1); /* 回缩到正常大小 */
-	    }
-	    100% {
-	        /* var(--x-out) 是随机左右偏移, var(--y-out) 是向上飘的高度 */
-	        transform: translate(calc(-50% + var(--x-out)), var(--y-out)) scale(1.2);
-	        opacity: 0;
-	    }
-	}
-		
+        @media (max-width: 1000px) {
+            .full-row { flex-direction: column; }
+            .container { grid-template-columns: repeat(2, 1fr); }
+            .card-bottom { min-height: auto; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-	<header class="app-header">
-    	<h1>HUD UI 工具箱 <span id="ghost-trigger" style="cursor: pointer; user-select: none;"> 👻 </span></h1>
-    	<p>视场角 FOV 与像素 换算助手 ｜ 2012 UCD</p>
-	</header>
-    <div class="card card-project">
-        <h2><i class="icon">📁</i> HUD 硬件规格</h2>
-        <div class="content-area">
+    <header class="app-header">
+        <h1>HUD UI 工具箱 <span id="ghost-emoji">👻</span></h1>
+    </header>
+
+    <div class="full-row">
+        <div class="card convert-card">
+            <h2>当前 HUD 规格(Source)</h2>
+            <div style="margin-bottom:15px">
+                <label>车型规格</label>
+                <select id="srcProject" onchange="calcConvert()"></select>
+            </div>
+            <label style="text-align: center; width: 100%; margin-bottom: 10px;">请输入当前元素像素值</label>
+            <div class="display-panel">
+                <input type="number" id="convertInputPx" class="panel-input" value="100" oninput="calcConvert()">
+                <div style="font-size: 1rem; color: var(--text-dim); margin-top: 4px;">像素 (px)</div>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 12px;">当前 PPD: <span id="srcPpdVal">0</span></div>
+        </div>
+
+        <div class="arrow-separator">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </div>
+
+        <div class="card convert-card">
+            <h2>目标 HUD 规格(Target)</h2>
+            <div style="margin-bottom:15px">
+                <label>车型规格</label>
+                <select id="dstProject" onchange="calcConvert()"></select>
+            </div>
+            <label style="text-align: center; width: 100%; margin-bottom: 10px;">建议目标像素值</label>
+            <div class="display-panel" style="background-color: #fff; border: 2px solid #f5f5f7;">
+                <div id="convertResult" style="font-size: 2.8rem; font-weight: 700; color: var(--blue);">0</div>
+                <div style="font-size: 1rem; color: var(--text-dim); margin-top: 4px;">像素 (px)</div>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 12px;">目标 PPD: <span id="dstPpdVal">0</span> | 视角: <span id="convertFov">0</span>°</div>
+        </div>
+    </div>
+
+    <div class="card card-bottom card-project">
+        <h2>📁 硬件规格库</h2>
+        <div class="table-container">
             <table class="project-table">
-                <thead>
-                    <tr><th>车型</th><th>H-FOV</th><th>横向分辨率</th></tr>
-                </thead>
-                <tbody id="projectList">
-                    	<tr onclick="applyHw(12, 1920)"><td>F2 ARHUD</td><td>12°</td><td>1920</td></tr>
-			<tr onclick="applyHw(10.7, 1800)"><td>F3 ARHUD</td><td>10.7°</td><td>1800</td></tr>
-			<tr onclick="applyHw(10.7, 1800)"><td>F1L ARHUD</td><td>10.7°</td><td>1800</td></tr>
-			<tr onclick="applyHw(10.7, 1800)"><td>EHU ARHUD</td><td>10.7°</td><td>1800</td></tr>
-			<tr onclick="applyHw(12.4, 1920)"><td>X6S ARHUD</td><td>12.4°</td><td>1920</td></tr>
-			<tr onclick="applyHw(9, 1074)"><td>X1L WHUD</td><td>9°</td><td>1074</td></tr>
-			<tr onclick="applyHw(9, 730)"><td>EHV WHUD</td><td>9°</td><td>730</td></tr>
-                    	<tr onclick="applyHw(9, 747)"><td>X4M WHUD</td><td>9°</td><td>747</td></tr>
-                    	<tr onclick="applyHw(9, 1482)"><td>X6M WHUD</td><td>9°</td><td>1482</td></tr>
-                    	<tr onclick="applyHw(9, 1245)"><td>SHB WHUD</td><td>9°</td><td>1245</td></tr>
-                </tbody>
+                <tbody id="projectList"></tbody>
             </table>
-            <p style="font-size: 0.7rem; color: var(--text-dim); margin-top: 10px;">* 点击车型行可快速切换配置</p>
         </div>
     </div>
 
-    <div class="card card-hw">
-        <h2><i class="icon">⚙️</i> 1. 当前参数</h2>
-        <div class="content-area">
-            <div class="group">
-                <label>硬件 FOV (水平 deg)</label>
-                <input type="number" id="hwFov" value="9" step="0.1" oninput="calculateAll()">
-            </div>
-            <div class="group">
-                <label>硬件 UI 分辨率 (水平 px)</label>
-                <input type="number" id="hwRes" value="1074" oninput="calculateAll()">
-            </div>
+    <div class="card card-bottom card-hw">
+        <h2>⚙️ PPD 计算器</h2>
+        <div class="content-wrapper">
+            <label>FOV (deg)</label>
+            <input type="number" id="hwFov" value="9" class="small-input" oninput="calculateAll()">
+            <label style="margin-top:10px">UI 分辨率 (px)</label>
+            <input type="number" id="hwRes" value="1074" class="small-input" oninput="calculateAll()">
         </div>
-        <div class="result-panel blue-bg">
-            <div style="font-size: 0.8rem; opacity: 0.8;">像素密度 PPD</div>
-            <div id="ppdOut" class="val-large">119.33</div>
-            <div style="font-size: 0.7rem;">Pixels Per Degree</div>
+        <div class="result-panel-styled blue-bg">
+            <div id="ppdOut" class="val-styled">119.33</div>
+            <div class="unit-small">PPD (Pixels Per Degree)</div>
         </div>
     </div>
 
-    <div class="card card-forward">
-        <h2><i class="icon">📐</i> 2. 视角 ➔ 像素</h2>
-        <div class="content-area">
-            <div class="group">
-                <label>目标元素视角 (FOV deg)</label>
-                <input type="number" id="targetFov" placeholder="例如: 0.8" step="0.01" oninput="calculateAll()">
-            </div>
-            <div class="std-list">
-                <div class="std-item" onclick="applyFov(0.8)">关键信息 <b>min: 0.8°</b></div>
-                <div class="std-item" onclick="applyFov(0.5)">主要文字 <b>min: 0.5°</b></div>
-		<div class="std-item" onclick="applyFov(0.2)">次要文字 <b>min: 0.2°</b></div>	
-                <div class="std-item" onclick="applyFov(0.3)">图形图标 <b>min: 0.3°</b></div>
-            </div>
-            <div style="margin-top: 10px; padding: 8px; background: #fff7e6; border-radius: 6px; border: 1px solid #ffd591; font-size: 0.65rem; color: #8c8c8c;">
-                提示：实际建议在此基础上增加 10%~20% 余量。点击可直接输入最小值。
-            </div>
+    <div class="card card-bottom card-forward">
+        <h2>🔍 视角 ➔ 像素</h2>
+        <div class="content-wrapper">
+            <label>目标 FOV (deg)</label>
+            <input type="number" id="targetFov" placeholder="例如 0.8" class="small-input" oninput="calculateAll()">
+            <p style="font-size: 0.7rem; color: var(--text-dim); margin-top:10px; line-height:1.4">点击规格库车型可自动应用硬件参数进行换算。</p>
         </div>
-        <div class="result-panel purple-bg">
-            <div style="font-size: 0.8rem; opacity: 0.8;">建议绘制尺寸</div>
-            <div id="pxOut" class="val-large">0 <span class="unit">px</span></div>
+        <div class="result-panel-styled purple-bg">
+            <div id="pxOut" class="val-styled">0</div>
+            <div class="unit-small">建议绘制像素 (px)</div>
         </div>
     </div>
 
-    <div class="card card-backward">
-        <h2><i class="icon">🔍</i> 3. 像素 ➔ 视角</h2>
-        <div class="content-area">
-            <div class="group">
-                <label>现有 UI 尺寸 (px)</label>
-                <input type="number" id="inputPx" placeholder="例如: 60" oninput="calculateAll()">
-            </div>
-            <div style="margin-top: 10px; font-size: 0.7rem; color: var(--text-dim); line-height: 1.4;">
-                将此结果与模块 2 的标准对比，核查设计稿是否合规。
-            </div>
+    <div class="card card-bottom card-color">
+        <h2>🎨 色彩 ΔY 核查</h2>
+        <div class="content-wrapper">
+            <label>颜色 1 (HEX/RGB)</label>
+            <input type="text" id="color1" placeholder="#FFFFFF" class="small-input" oninput="calculateColor()">
+            <label style="margin-top:10px">颜色 2 (HEX/RGB)</label>
+            <input type="text" id="color2" placeholder="#000000" class="small-input" oninput="calculateColor()">
         </div>
-        <div class="result-panel green-bg">
-            <div style="font-size: 0.8rem; opacity: 0.8;">占据视角 FOV</div>
-            <div id="fovOut" class="val-large">0.00 <span class="unit">°</span></div>
+        <div class="result-panel-styled red-bg">
+            <div id="y-diff" class="val-styled">0.00</div>
+            <div class="unit-small">亮度差 (ΔY)</div>
         </div>
     </div>
-
-    <div class="card card-color">
-    	<h2><i class="icon">🎨</i> 色彩亮度核查 (YUV)</h2>
-    	<div class="content-area">
-        	<div class="color-input-group">
-            		<div class="group">
-                		<label>颜色 1 (HEX/RGB)</label>
-                		<input type="text" id="color1" placeholder="#FFFFFF" oninput="calculateColor()">
-                		<div id="preview1" class="color-preview"></div>
-            		</div>
-            		<div class="group">
-                		<label>颜色 2 (HEX/RGB)</label>
-                		<input type="text" id="color2" placeholder="#000000" oninput="calculateColor()">
-                		<div id="preview2" class="color-preview"></div>
-            		</div>
-        	</div>
-        	<div style="font-size: 0.75rem; color: var(--text-dim); line-height: 1.4;">
-            		<p>Y1: <span id="y1-val" style="color:var(--text-main); font-weight:bold;">-</span></p>
-            		<p>Y2: <span id="y2-val" style="color:var(--text-main); font-weight:bold;">-</span></p>
-        	</div>
-    	</div>
-    	<div class="y-result-box">
-        	<div style="font-size: 0.8rem; opacity: 0.8;">亮度差 (ΔY)</div>
-        	<div id="y-diff" class="diff-val">0.00</div>
-        	<div style="font-size: 0.7rem;">公式: Y = 0.299R + 0.587G + 0.114B</div>
-   	</div>
-     </div>
-
 </div>
 
 <script>
-    // 基于你上传的 Excel 数据填充表格 (你可以根据实际情况微调这些值)
     const projects = [
         { name: "F2 ARHUD", fov: 12, res: 1920 },
-	{ name: "F3 ARHUD", fov: 10.7, res: 1800 },
-	{ name: "F1L ARHUD", fov: 10.7, res: 1800 },
-	{ name: "EHU ARHUD", fov: 10.7, res: 1800 },	
-	{ name: "X6S ARHUD", fov: 12.4, res: 1920 },
+        { name: "F3 ARHUD", fov: 10.7, res: 1800 },
+        { name: "F1L ARHUD", fov: 10.7, res: 1800 },
+        { name: "EHU ARHUD", fov: 10.7, res: 1800 },    
+        { name: "X6S ARHUD", fov: 12.4, res: 1920 },
         { name: "X1L WHUD", fov: 9, res: 1074 },
         { name: "EHV WHUD", fov: 9, res: 730 },
-	{ name: "X4M WHUD", fov: 9, res: 747 },
-	{ name: "X6M WHUD", fov: 9, res: 1482 },
-	{ name: "SHB WHUD", fov: 9, res: 1245 },
+        { name: "X4M WHUD", fov: 9, res: 747 },
+        { name: "X6M WHUD", fov: 9, res: 1482 },
+        { name: "SHB WHUD", fov: 9, res: 1245 },
     ];
 
+    // 👻 交互逻辑
+    const ghostEmoji = document.getElementById('ghost-emoji');
+    ghostEmoji.addEventListener('click', (e) => {
+        ghostEmoji.style.transform = 'scale(1.6)';
+        setTimeout(() => { ghostEmoji.style.transform = 'scale(1)'; }, 200);
+        const rect = ghostEmoji.getBoundingClientRect();
+        for (let i = 0; i < 6; i++) {
+            const ghost = document.createElement('div');
+            ghost.className = 'floating-ghost';
+            ghost.innerText = '👻';
+            ghost.style.setProperty('--x-random', `${(Math.random() - 0.5) * 240}px`);
+            ghost.style.setProperty('--r-random', `${(Math.random() - 0.5) * 60}deg`);
+            ghost.style.left = (rect.left + rect.width / 2 - 15) + 'px';
+            ghost.style.top = (rect.top + rect.height / 2 - 15) + 'px';
+            document.body.appendChild(ghost);
+            setTimeout(() => ghost.remove(), 1800);
+        }
+    });
+
     function renderProjects() {
-        const html = projects.map(p => `
+        document.getElementById('projectList').innerHTML = projects.map(p => `
             <tr onclick="applyHw(${p.fov}, ${p.res})">
-                <td>${p.name}</td>
-                <td>${p.fov}°</td>
-                <td>${p.res}</td>
+                <td>${p.name}</td><td>${p.fov}°</td><td>${p.res}px</td>
             </tr>
         `).join('');
-        document.getElementById('projectList').innerHTML = html;
+        const options = projects.map((p, i) => `<option value="${i}">${p.name}</option>`).join('');
+        document.getElementById('srcProject').innerHTML = options;
+        document.getElementById('dstProject').innerHTML = options;
+        document.getElementById('srcProject').selectedIndex = 0;
+        document.getElementById('dstProject').selectedIndex = 5;
+    }
+
+    function calcConvert() {
+        const srcP = projects[document.getElementById('srcProject').value];
+        const dstP = projects[document.getElementById('dstProject').value];
+        const px = parseFloat(document.getElementById('convertInputPx').value) || 0;
+        const srcPpd = srcP.res / srcP.fov;
+        const dstPpd = dstP.res / dstP.fov;
+        const fov = px / srcPpd;
+        document.getElementById('srcPpdVal').innerText = srcPpd.toFixed(1);
+        document.getElementById('dstPpdVal').innerText = dstPpd.toFixed(1);
+        document.getElementById('convertFov').innerText = fov.toFixed(2);
+        document.getElementById('convertResult').innerText = Math.round(fov * dstPpd);
     }
 
     function calculateAll() {
-        const hwFov = parseFloat(document.getElementById('hwFov').value) || 0;
-        const hwRes = parseFloat(document.getElementById('hwRes').value) || 0;
-        const targetFov = parseFloat(document.getElementById('targetFov').value) || 0;
-        const inputPx = parseFloat(document.getElementById('inputPx').value) || 0;
-
-        if (hwFov > 0 && hwRes > 0) {
-            const ppd = hwRes / hwFov;
+        const f = parseFloat(document.getElementById('hwFov').value) || 0;
+        const r = parseFloat(document.getElementById('hwRes').value) || 0;
+        const tF = parseFloat(document.getElementById('targetFov').value) || 0;
+        if (f > 0 && r > 0) {
+            const ppd = r / f;
             document.getElementById('ppdOut').innerText = ppd.toFixed(2);
-            const pxRes = Math.round(targetFov * ppd);
-            document.getElementById('pxOut').innerHTML = pxRes + ' <span class="unit">px</span>';
-            const fovRes = inputPx / ppd;
-            document.getElementById('fovOut').innerHTML = fovRes.toFixed(2) + ' <span class="unit">°</span>';
+            document.getElementById('pxOut').innerText = Math.round(tF * ppd);
         }
     }
 
-    function applyHw(fov, res) {
-        document.getElementById('hwFov').value = fov;
-        document.getElementById('hwRes').value = res;
-        calculateAll();
+    function applyHw(f, r) { document.getElementById('hwFov').value = f; document.getElementById('hwRes').value = r; calculateAll(); }
+
+    function calculateColor() {
+        const c1 = parseColor(document.getElementById('color1').value);
+        const c2 = parseColor(document.getElementById('color2').value);
+        if (c1 && c2) {
+            const y1 = 0.299 * c1.r + 0.587 * c1.g + 0.114 * c1.b;
+            const y2 = 0.299 * c2.r + 0.587 * c2.g + 0.114 * c2.b;
+            document.getElementById('y-diff').innerText = Math.abs(y1 - y2).toFixed(2);
+        }
     }
 
-    function applyFov(val) {
-        document.getElementById('targetFov').value = val;
-        calculateAll();
-    }
-
-    // 初始化
-    renderProjects();
-    calculateAll();
-
-    // 解析颜色输入为 RGB 数组
     function parseColor(input) {
-    	let r, g, b;
-    	input = input.trim();
-    
-    	// 处理 HEX
-    	if (input.startsWith('#')) {
-        	const hex = input.replace('#', '');
-        	r = parseInt(hex.substring(0, 2), 16);
-        	g = parseInt(hex.substring(2, 4), 16);
-        	b = parseInt(hex.substring(4, 6), 16);
-    	} 
-    	// 处理 RGB(a)
-    	else if (input.toLowerCase().startsWith('rgb')) {
-        	const match = input.match(/\d+/g);
-        	if (match) {
-            		[r, g, b] = match.map(Number);
-        	}
-    	}
-    
-    	if (isNaN(r) || isNaN(g) || isNaN(b)) return null;
-    		return { r, g, b };
-     }
-
-     function calculateColor() {
-    	const c1Input = document.getElementById('color1').value;
-    	const c2Input = document.getElementById('color2').value;
-    
-    	const c1 = parseColor(c1Input);
-    	const c2 = parseColor(c2Input);
-    
-    	let y1 = 0, y2 = 0;
-
-    	if (c1) {
-        	y1 = 0.299 * c1.r + 0.587 * c1.g + 0.114 * c1.b;
-        	document.getElementById('y1-val').innerText = y1.toFixed(2);
-        	document.getElementById('preview1').style.backgroundColor = `rgb(${c1.r},${c1.g},${c1.b})`;
-    	}
-    
-    	if (c2) {
-        	y2 = 0.299 * c2.r + 0.587 * c2.g + 0.114 * c2.b;
-        	document.getElementById('y2-val').innerText = y2.toFixed(2);
-        	document.getElementById('preview2').style.backgroundColor = `rgb(${c2.r},${c2.g},${c2.b})`;
-    	}
-    
-    	if (c1 && c2) {
-        	const diff = Math.abs(y1 - y2);
-        	document.getElementById('y-diff').innerText = diff.toFixed(2);
-    	}
-     }
-	document.addEventListener('click', function(e) {
-    // 如果你只想在点击标题 🎯 时触发，可以加这个判断：
-    if (e.target.id !== 'ghost-trigger') return;
-
-    const count = 3; // 每次点击飞出 3 个，更有层次感
-    
-    for (let i = 0; i < count; i++) {
-        const ghost = document.createElement('div');
-        ghost.className = 'ghost-emoji';
-        ghost.innerText = '👻';
-        
-        // 1. 设置点击的具体坐标
-        ghost.style.left = e.clientX + 'px';
-        ghost.style.top = e.clientY + 'px';
-        
-        // 2. 随机化路径参数
-        const randomX = (Math.random() - 0.5) * 100 + 'px'; // 左右偏移 -50px 到 50px
-        const randomY = (e.clientY - 150 - Math.random() * 100) + 'px'; // 向上飘 150-250px
-        const randomDelay = Math.random() * 0.1 + 's';
-        
-        ghost.style.setProperty('--x-out', randomX);
-        ghost.style.setProperty('--y-out', randomY);
-        
-        // 3. 应用动画
-        ghost.style.animation = `ghost-insta-up 0.8s ease-out ${randomDelay} forwards`;
-        
-        document.body.appendChild(ghost);
-        
-        // 4. 清理元素
-        setTimeout(() => ghost.remove(), 1000);
+        input = input.trim();
+        let r, g, b;
+        if (input.startsWith('#')) {
+            const hex = input.replace('#', '');
+            r = parseInt(hex.substring(0, 2), 16);
+            g = parseInt(hex.substring(2, 4), 16);
+            b = parseInt(hex.substring(4, 6), 16);
+        } else if (input.toLowerCase().startsWith('rgb')) {
+            const match = input.match(/\d+/g);
+            if (match) [r, g, b] = match.map(Number);
+        }
+        return (isNaN(r) || isNaN(g) || isNaN(b)) ? null : { r, g, b };
     }
-});
 
+    renderProjects(); calculateAll(); calcConvert();
 </script>
 
 </body>
