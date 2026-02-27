@@ -1,15 +1,15 @@
 :root {
-        --bg-color: #f5f5f7;
-        --card-bg: #ffffff;
-        --text-main: #1d1d1f;
-        --text-dim: #86868b;
-        --blue: #0071e3;
-        --purple: #5856D6;
-        --green: #34C759;
-        --orange: #FF9500;
-        --red: #FF2D55;
-        --border-radius: 20px;
-    }
+    --bg-color: #f5f5f7;
+    --card-bg: #ffffff;
+    --text-main: #1d1d1f;
+    --text-dim: #86868b;
+    --blue: #0071e3;
+    --purple: #5856D6;
+    --green: #34C759;
+    --orange: #FF9500;
+    --red: #FF2D55;
+    --border-radius: 20px;
+}
 
 body { 
     font-family: -apple-system, "SF Pro Text", "SF Pro Display", sans-serif; 
@@ -48,14 +48,9 @@ body {
 }
 .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
 
-/* 顶部卡片：纯白 Apple 风格 */
 .convert-card { flex: 1; border-top: 1px solid rgba(0,0,0,0.05); }
 
-/* 下方卡片：彩色装饰条 & 高度对齐 */
-.card-bottom { 
-    min-height: 380px; /* 统一底部卡片高度 */
-    justify-content: flex-start;
-}
+.card-bottom { min-height: 380px; justify-content: flex-start; }
 .card-project { border-top: 6px solid var(--orange); }
 .card-hw { border-top: 6px solid var(--blue); }
 .card-forward { border-top: 6px solid var(--purple); }
@@ -85,34 +80,98 @@ select { width: 100%; padding: 12px; background: #f5f5f7; border: 1px solid tran
     display: flex; flex-direction: column; justify-content: center; min-height: 110px;
     border: 2px solid transparent; transition: all 0.2s ease;
 }
-.display-panel:focus-within { background: #fff; border-color: var(--blue); box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1); }
 .panel-input { background: transparent; border: none; width: 100%; text-align: center; font-size: 2.8rem; font-weight: 700; outline: none; }
 
-/* 底部卡片输出区域背板 */
-.result-panel-styled {
-    margin-top: auto; /* 关键：推到底部对齐 */
-    padding: 15px; border-radius: 12px; text-align: center;
-    min-height: 80px; display: flex; flex-direction: column; justify-content: center;
-}
+/* 辅助面板样式 */
+.result-panel-styled { margin-top: auto; padding: 15px; border-radius: 12px; text-align: center; min-height: 80px; display: flex; flex-direction: column; justify-content: center; }
 .blue-bg { background: rgba(0, 113, 227, 0.06); color: var(--blue); }
 .purple-bg { background: rgba(88, 86, 214, 0.06); color: var(--purple); }
 .red-bg { background: rgba(255, 45, 85, 0.06); color: var(--red); }
-
 .val-styled { font-size: 1.8rem; font-weight: 700; margin: 2px 0; }
 .unit-small { font-size: 0.8rem; opacity: 0.8; font-weight: 400; }
-
 .arrow-separator { display: flex; align-items: center; justify-content: center; color: #d2d2d7; }
-
-/* 硬件规格库列表优化 */
 .project-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
 .project-table tr { cursor: pointer; border-bottom: 1px solid #f5f5f7; }
 .project-table td { padding: 10px 5px; }
-.table-container { overflow-y: auto; max-height: 320px; } /* 露出更多行数 */
-
+.table-container { overflow-y: auto; max-height: 320px; }
 .small-input { width: 100%; border: none; background: #f5f5f7; padding: 10px; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; }
 
-@media (max-width: 1000px) {
-    .full-row { flex-direction: column; }
-    .container { grid-template-columns: repeat(2, 1fr); }
-    .card-bottom { min-height: auto; }
+/* --- Visual Lab 专用样式 (iOS 风格 & 报错修复) --- */
+.visual-lab-card { grid-column: 1 / -1; border-top: 6px solid var(--green); width: 100%; box-sizing: border-box; }
+.lab-header { margin-bottom: 20px; }
+.lab-content { display: flex; gap: 30px; align-items: flex-start; }
+.lab-controls { width: 300px; flex-shrink: 0; }
+.lab-viewport { flex-grow: 1; aspect-ratio: 16 / 9; background: #000; border-radius: 14px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 2px solid #2c2c2e; box-shadow: inset 0 0 40px rgba(0,0,0,0.8); }
+
+.control-item { background: #f2f2f7; padding: 16px; border-radius: 14px; margin-bottom: 15px; }
+.ios-segmented-control { background: rgba(118, 118, 128, 0.12); border-radius: 10px; padding: 2px; display: flex; }
+.segment-btn { flex: 1; border: none; background: transparent; padding: 7px 0; font-size: 12px; font-weight: 500; color: #1d1d1f; cursor: pointer; border-radius: 8px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.segment-btn.active { background: #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #000; }
+
+.ios-slider { -webkit-appearance: none; -moz-appearance: none; appearance: none; width: 100%; height: 4px; background: #d2d2d7; border-radius: 2px; margin: 15px 0; outline: none; }
+.ios-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; background: #ffffff; border: 0.5px solid rgba(0,0,0,0.04); box-shadow: 0 3px 8px rgba(0,0,0,0.15); border-radius: 50%; cursor: pointer; }
+
+.ios-color-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
+
+/* HEX 文本输入框：等宽字体更有设计感 */
+#labColorInput {
+    width: 85px;
+    height: 32px;
+    background: #ffffff;
+    border: 1px solid #d2d2d7;
+    border-radius: 8px;
+    padding: 0 8px;
+    font-size: 13px;
+    font-family: 'SF Mono', 'Menlo', monospace; 
+    font-weight: 600;
+    color: #1d1d1f;
+    outline: none;
+    box-sizing: border-box;
+}
+
+#labColorInput:focus { border-color: var(--blue); }
+
+/* 隐藏原生 color picker 的 UI，只保留点击功能 */
+.color-trigger-container {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+}
+
+#labColorPicker {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0; /* 完全透明，盖在圆形上方 */
+    cursor: pointer;
+    z-index: 2;
+}
+
+.color-preview-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #00ff00;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px #d2d2d7;
+    z-index: 1;
+    transition: background-color 0.1s ease;
+}
+.ios-value-tag { font-size: 11px; font-weight: 700; background: var(--blue); color: #fff; padding: 2px 8px; border-radius: 10px; }
+
+.lab-element { position: absolute; z-index: 10; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+.speed-mode { font-family: 'SF Pro Display', 'DIN Alternate', sans-serif; font-weight: 700; line-height: 1; }
+.nav-mode { background: currentColor; clip-path: polygon(50% 0%, 100% 40%, 75% 40%, 75% 100%, 25% 100%, 25% 40%, 0% 40%); }
+.warn-mode { background: #FF3B30; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
+
+.lab-scene-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center bottom; opacity: 0; transition: opacity 0.4s ease; z-index: 1; }
+.scene-city { background-image: url('https://images.unsplash.com/photo-1593716553969-2b5c549e48a5?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); }
+.scene-highway { background-image: url('https://images.unsplash.com/photo-1494783367193-149034c05e8f?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); }
+.scene-snow { background-image: url('https://images.unsplash.com/photo-1615169279328-dd4d50d5a700?q=80&w=2148&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); }
+
+@media (max-width: 1000px) { .full-row { flex-direction: column; } .container { grid-template-columns: repeat(2, 1fr); } .card-bottom { min-height: auto; } .lab-content { flex-direction: column; } .lab-controls { width: 100%; } }

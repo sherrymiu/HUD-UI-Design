@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>HUD UI 工具箱</title>
+    <title>HUD UI 工具箱 - 设计决策专家版</title>
 </head>
 <body>
 
@@ -12,12 +12,12 @@
     <header class="app-header">
         <h1>HUD UI 工具箱 <span id="ghost-emoji">👻</span></h1>
         <p class="app-desc">该工具可以用于HUD光机视场角和像素值的换算，适用于设计、适配、验证等场景。输入当前设备的像素值，即可自动计算目标设备的像素值。</p>
-        <div class="app-author">作者：许扬苗 2012 UCD实验室</div>
+        <div class="app-author">作者：许扬苗 2012 UCD实验室 with help from Gemini :)</div>
     </header>
 
     <div class="full-row">
         <div class="card convert-card">
-            <h2>当前 HUD 规格(Source)</h2>
+            <h2>当前 HUD 规格 (Source)</h2>
             <div style="margin-bottom:15px">
                 <label>车型规格</label>
                 <select id="srcProject" onchange="calcConvert()"></select>
@@ -35,7 +35,7 @@
         </div>
 
         <div class="card convert-card">
-            <h2>目标 HUD 规格(Target)</h2>
+            <h2>目标 HUD 规格 (Target)</h2>
             <div style="margin-bottom:15px">
                 <label>车型规格</label>
                 <select id="dstProject" onchange="calcConvert()"></select>
@@ -46,6 +46,63 @@
                 <div style="font-size: 1rem; color: var(--text-dim); margin-top: 4px;">像素 (px)</div>
             </div>
             <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 12px;">目标 PPD: <span id="dstPpdVal">0</span> | 视角: <span id="convertFov">0</span>°</div>
+        </div>
+    </div>
+
+    <div class="full-row">
+        <div class="card visual-lab-card">
+            <div class="lab-header">
+                <h2>🧪 实景Demo 仅作参考</h2>
+                <p>独立于换算器，在 16:9 固定比例视口内模拟真实路面背景与 UI 表现</p>
+            </div>
+            
+            <div class="lab-content">
+                <div class="lab-controls">
+                    <div class="control-item">
+                        <label>环境背景</label>
+                        <div class="ios-segmented-control">
+                            <button onclick="updateLabScene('none')" class="segment-btn active" id="btn-scene-none">纯净</button>
+                            <button onclick="updateLabScene('city')" class="segment-btn" id="btn-scene-city">城市</button>
+                            <button onclick="updateLabScene('highway')" class="segment-btn" id="btn-scene-highway">高速</button>
+                            <button onclick="updateLabScene('snow')" class="segment-btn" id="btn-scene-snow">雪地</button>
+                        </div>
+                    </div>
+
+                    <div class="control-item">
+                        <label>显示内容</label>
+                        <div class="ios-segmented-control">
+                            <button onclick="updateLabContent('speed')" class="segment-btn active" id="btn-content-speed">车速</button>
+                            <button onclick="updateLabContent('nav')" class="segment-btn" id="btn-content-nav">导航</button>
+                            <button onclick="updateLabContent('warn')" class="segment-btn" id="btn-content-warn">警告</button>
+                        </div>
+                    </div>
+
+                    <div class="control-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <label>UI 尺寸</label>
+                            <span class="ios-value-tag"><span id="labSizeLabel">80</span> px</span>
+                        </div>
+                        <input type="range" id="labSizeSlider" class="ios-slider" min="20" max="300" value="80" oninput="updateLabSize()">
+                        <p class="hint-text">对应 FOV: <span id="labFovLabel">0.67</span>°</p>
+                    </div>
+                    
+                    <div class="control-item" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0;">
+                        <label>色彩 HEX</label>
+                        <div class="ios-color-wrapper">
+                            <input type="text" id="labColorInput" value="#00ff00" maxlength="7" oninput="handleHexInput()">
+                            <div class="color-trigger-container">
+                                <input type="color" id="labColorPicker" value="#00ff00" oninput="handlePickerInput()">
+                                <div class="color-preview-circle" id="colorCircle"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lab-viewport" id="labViewport">
+                    <div id="labHudElement" class="lab-element speed-mode">120</div>
+                    <div id="labSceneOverlay" class="lab-scene-overlay"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -77,7 +134,7 @@
         <div class="content-wrapper">
             <label>目标 FOV (deg)</label>
             <input type="number" id="targetFov" placeholder="例如 0.8" class="small-input" oninput="calculateAll()">
-            <p style="font-size: 0.7rem; color: var(--text-dim); margin-top:10px; line-height:1.4">点击规格库车型可自动应用硬件参数进行换算。</p>
+            <p style="font-size: 0.7rem; color: var(--text-dim); margin-top:10px; line-height:1.4">点击规格库车型可自动应用硬件参数。</p>
         </div>
         <div class="result-panel-styled purple-bg">
             <div id="pxOut" class="val-styled">0</div>
@@ -101,7 +158,5 @@
 </div>
 
 <script src="script.js"></script>
-
-
 </body>
 </html>

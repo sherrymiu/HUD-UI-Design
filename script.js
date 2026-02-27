@@ -1,17 +1,17 @@
 const projects = [
-        { name: "F2 ARHUD", fov: 12, res: 1920 },
-        { name: "F2N ARHUD Near", fov: 10, res: 1000 },
-        { name: "F2N ARHUD Far", fov: 12, res: 1350 },
-        { name: "F3 ARHUD", fov: 10.7, res: 1800 },
-        { name: "F1L ARHUD", fov: 10.7, res: 1800 },
-        { name: "EHU ARHUD", fov: 10.7, res: 1800 },    
-        { name: "X6S ARHUD", fov: 12.4, res: 1920 },
-        { name: "X1L WHUD", fov: 9, res: 1074 },
-        { name: "EHV WHUD", fov: 9, res: 730 },
-        { name: "X4M WHUD", fov: 9, res: 747 },
-        { name: "X6M WHUD", fov: 9, res: 1482 },
-        { name: "SHB WHUD", fov: 9, res: 1245 },
-    ];
+    { name: "F2 ARHUD", fov: 12, res: 1920 },
+    { name: "F2N ARHUD Near", fov: 10, res: 1000 },
+    { name: "F2N ARHUD Far", fov: 12, res: 1350 },
+    { name: "F3 ARHUD", fov: 10.7, res: 1800 },
+    { name: "F1L ARHUD", fov: 10.7, res: 1800 },
+    { name: "EHU ARHUD", fov: 10.7, res: 1800 },    
+    { name: "X6S ARHUD", fov: 12.4, res: 1920 },
+    { name: "X1L WHUD", fov: 9, res: 1074 },
+    { name: "EHV WHUD", fov: 9, res: 730 },
+    { name: "X4M WHUD", fov: 9, res: 747 },
+    { name: "X6M WHUD", fov: 9, res: 1482 },
+    { name: "SHB WHUD", fov: 9, res: 1245 },
+];
 
 // 👻 交互逻辑
 const ghostEmoji = document.getElementById('ghost-emoji');
@@ -21,8 +21,7 @@ ghostEmoji.addEventListener('click', (e) => {
     const rect = ghostEmoji.getBoundingClientRect();
     for (let i = 0; i < 6; i++) {
         const ghost = document.createElement('div');
-        ghost.className = 'floating-ghost';
-        ghost.innerText = '👻';
+        ghost.className = 'floating-ghost'; ghost.innerText = '👻';
         ghost.style.setProperty('--x-random', `${(Math.random() - 0.5) * 240}px`);
         ghost.style.setProperty('--r-random', `${(Math.random() - 0.5) * 60}deg`);
         ghost.style.left = (rect.left + rect.width / 2 - 15) + 'px';
@@ -32,6 +31,7 @@ ghostEmoji.addEventListener('click', (e) => {
     }
 });
 
+// 渲染项目列表
 function renderProjects() {
     document.getElementById('projectList').innerHTML = projects.map(p => `
         <tr onclick="applyHw(${p.fov}, ${p.res})">
@@ -45,6 +45,7 @@ function renderProjects() {
     document.getElementById('dstProject').selectedIndex = 5;
 }
 
+// 顶部换算逻辑
 function calcConvert() {
     const srcP = projects[document.getElementById('srcProject').value];
     const dstP = projects[document.getElementById('dstProject').value];
@@ -57,8 +58,10 @@ function calcConvert() {
     document.getElementById('srcFovVal').innerText = fov.toFixed(2);
     document.getElementById('convertFov').innerText = fov.toFixed(2);
     document.getElementById('convertResult').innerText = Math.round(fov * dstPpd);
+    updateLabSize(); // 联动更新实验室的 FOV 换算
 }
 
+// 辅助工具计算逻辑
 function calculateAll() {
     const f = parseFloat(document.getElementById('hwFov').value) || 0;
     const r = parseFloat(document.getElementById('hwRes').value) || 0;
@@ -70,7 +73,11 @@ function calculateAll() {
     }
 }
 
-function applyHw(f, r) { document.getElementById('hwFov').value = f; document.getElementById('hwRes').value = r; calculateAll(); }
+function applyHw(f, r) { 
+    document.getElementById('hwFov').value = f; 
+    document.getElementById('hwRes').value = r; 
+    calculateAll(); 
+}
 
 function calculateColor() {
     const c1 = parseColor(document.getElementById('color1').value);
@@ -97,4 +104,115 @@ function parseColor(input) {
     return (isNaN(r) || isNaN(g) || isNaN(b)) ? null : { r, g, b };
 }
 
-renderProjects(); calculateAll(); calcConvert();
+// --- Visual Lab 核心逻辑 ---
+let labState = { scene: 'none', content: 'speed', color: '#ffffff' };
+
+window.updateLabScene = function(scene) {
+    labState.scene = scene;
+    const overlay = document.getElementById('labSceneOverlay');
+    overlay.className = 'lab-scene-overlay';
+    if (scene !== 'none') {
+        overlay.classList.add('scene-' + scene);
+        overlay.style.opacity = '1';
+    } else {
+        overlay.style.opacity = '0';
+    }
+    document.querySelectorAll('[id^="btn-scene-"]').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-scene-' + scene).classList.add('active');
+};
+
+window.updateLabContent = function(type) {
+    labState.content = type;
+    const el = document.getElementById('labHudElement');
+    el.className = 'lab-element ' + type + '-mode';
+    el.innerText = (type === 'speed') ? '120' : '';
+    
+    // 强制刷新颜色应用
+    updateLabColor();
+    
+    document.querySelectorAll('[id^="btn-content-"]').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-content-' + type).classList.add('active');
+    updateLabSize();
+};
+
+window.updateLabSize = function() {
+    const slider = document.getElementById('labSizeSlider');
+    const el = document.getElementById('labHudElement');
+    const size = slider.value;
+    document.getElementById('labSizeLabel').innerText = size;
+    
+    if (labState.content === 'speed') {
+        el.style.fontSize = size + 'px';
+        el.style.width = 'auto'; el.style.height = 'auto';
+    } else {
+        el.style.width = size + 'px'; el.style.height = size + 'px';
+    }
+
+    const dstP = projects[document.getElementById('dstProject').value];
+    const currentPpd = dstP.res / dstP.fov;
+    document.getElementById('labFovLabel').innerText = (size / currentPpd).toFixed(2);
+};
+
+// 核心同步函数：确保输入框、拾色器、预览图三者颜色一致
+function applyLabColor(color) {
+    const el = document.getElementById('labHudElement');
+    const circle = document.getElementById('colorCircle');
+    const hexInput = document.getElementById('labColorInput');
+    const picker = document.getElementById('labColorPicker');
+
+    // 1. 更新 HUD 预览元素
+    if (labState.content === 'speed') {
+        el.style.color = color;
+        el.style.backgroundColor = 'transparent';
+    } else {
+        el.style.backgroundColor = color;
+        el.style.color = 'transparent';
+    }
+    el.style.filter = `drop-shadow(0 0 10px ${color}88)`;
+
+    // 2. 同步预览色块和内部状态
+    circle.style.backgroundColor = color;
+    labState.color = color;
+
+    // 3. 互相同步两个输入源
+    if (hexInput.value.toUpperCase() !== color.toUpperCase()) {
+        hexInput.value = color.toUpperCase();
+    }
+    picker.value = color;
+}
+
+// 监听文本框输入
+window.handleHexInput = function() {
+    let val = document.getElementById('labColorInput').value;
+    if (val.length > 0 && !val.startsWith('#')) {
+        val = '#' + val;
+        document.getElementById('labColorInput').value = val;
+    }
+    
+    if (/^#[0-9A-F]{6}$/i.test(val)) {
+        applyLabColor(val);
+        document.getElementById('labColorInput').style.borderColor = '#d2d2d7';
+    } else if (val.length === 7) {
+        document.getElementById('labColorInput').style.borderColor = 'var(--red)';
+    }
+};
+
+// 监听系统拾色器点击切换
+window.handlePickerInput = function() {
+    const color = document.getElementById('labColorPicker').value;
+    applyLabColor(color);
+};
+
+// 统一接口：供切换内容模式时调用
+window.updateLabColor = function() {
+    applyLabColor(labState.color || "#00ff00");
+};
+
+// 初始化
+window.addEventListener('DOMContentLoaded', () => {
+    renderProjects();
+    calcConvert();
+    calculateAll();
+    updateLabSize();
+    updateLabColor();
+});
